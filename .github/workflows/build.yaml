@@ -36,6 +36,7 @@ jobs:
         with:
           script-name: main.py
           mode: app
+          static-libpython: yes
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
@@ -47,13 +48,13 @@ jobs:
             build/*.app/**/*
           include-hidden-files: true
 
-      - name: Upload Release Asset
-        if: ${{ github.ref == 'refs/heads/main' }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/
-          asset_name: ${{ runner.os }}-build.zip
-          asset_content_type: application/zip
+#      - name: Upload Release Asset
+#        if: ${{ github.ref == 'refs/heads/main' }}
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: build/
+#          asset_name: ${{ runner.os }}-build.zip
+#          asset_content_type: application/zip
