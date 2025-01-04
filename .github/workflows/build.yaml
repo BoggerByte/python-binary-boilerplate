@@ -10,18 +10,50 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os:
+          - ubuntu-latest
+#          - windows-latest
+
     runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - name: Check-out repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: 3.12
-      - run: |
-          pip install nuitka
-          nuitka --standalone --onefile --output-dir=dist main.py
-      - name: Upload Binary
-        uses: actions/upload-artifact@v3
+          architecture: 'x64'
+          cache: 'pip'
+
+#      - name: Install Dependencies
+#        run: |
+#          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Build Executable
+        uses: Nuitka/Nuitka-Action@main
         with:
-          name: build-${{ matrix.os }}
-          path: dist/
+          script-name: main
+          mode: app
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }} Build
+          path: |
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
+          include-hidden-files: true
+
+      - name: Upload Release Asset
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/
+          asset_name: ${{ runner.os }}-build.zip
+          asset_content_type: application/zip
